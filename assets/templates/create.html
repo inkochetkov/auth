@@ -1,0 +1,14 @@
+{{ define "create"}}
+{{template "header"}}
+<main role="main" class="inner cover">
+    <h1 class="cover-heading">Регистрация</h1>
+    <form action="/save_user" method="POST">
+        <input type="text" name="username" id="username" placeholder="Введите имя пользователя" class="form-control">
+        <br>
+        <textarea name="password" id="password" class="form-control" placeholder="Введите пароль"></textarea>
+        <br>
+        <button class="btn btn-warning">Зарегистрироваться</button>
+    </form>
+</main>
+{{template "footer"}}
+{{end}}
