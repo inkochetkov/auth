@@ -23,8 +23,14 @@ func checkError(err error) {
 }
 
 type User struct {
-	Id                       int
-	Username, Password, HASH string
+	Id       string `db:"id"`
+	Username string `db:"username"`
+	Password string `db:"password"`
+	HASH     string `db:"hash"`
+}
+
+type Auth struct {
+	Id int
 }
 
 //var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
@@ -35,6 +41,14 @@ const (
 )
 
 func index(w http.ResponseWriter, r *http.Request) {
+	cookie, _ := r.Cookie(COOKIE_NAME)
+	var auth Auth
+	if COOKIE_NAME == "" {
+		auth.Id = 0
+	} else {
+		auth.Id = 1
+	}
+	log.Println(cookie)
 
 	t, _ := template.ParseFiles("assets/templates/index.html", "assets/templates/header.html", "assets/templates/footer.html")
 
@@ -94,26 +108,52 @@ func auth(w http.ResponseWriter, r *http.Request) {
 	t.ExecuteTemplate(w, "auth", nil)
 }
 func valid(w http.ResponseWriter, r *http.Request) {
-	username := r.FormValue("username")
-	password := r.FormValue("password")
-	if username == "" || password == "" {
+	U := r.FormValue("username")
+	P := r.FormValue("password")
+	if U == "" || P == "" {
 		fmt.Fprintf(w, "Не все данные заполнены")
 	} else {
 		db, _ := sql.Open("sqlite3", "init/bd.sq3")
 		defer db.Close()
 
-		sql3 := "SELECT * FROM `user` WHERE  username = `" + username + "` and password = `" + password + "`"
-		log.Println(sql3)
-		res, _ := db.Query(sql3)
-		defer res.Close()
-		var user User
+		sql3 := fmt.Sprintf("SELECT * FROM `user` WHERE  `username` = %s and `password`=%s", U, P)
+		res, err := db.Query(sql3)
+		checkError(err)
 		for res.Next() {
-			res.Scan(&user.HASH)
+			var user User
+			err = res.Scan(&user.Id, &user.Username, &user.Password, &user.HASH)
+			checkError(err)
+			//	fmt.Println(user.Id, user.Username, user.Password, user.HASH)
+
+			cookie := &http.Cookie{
+				Name: COOKIE_NAME,
+				//	Domain: "localhost",
+				//  Path: "/",
+				//  HttpOnly: false,
+				//  Secure: true,
+				//  MaxAge: 86400,
+				Expires: time.Now().AddDate(1, 0, 0),
+			}
+			cookie.Value = user.HASH
+			http.SetCookie(w, cookie)
 
 		}
 
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
+}
+func logout(w http.ResponseWriter, r *http.Request) {
+	cookie := &http.Cookie{
+		Name: COOKIE_NAME,
+		//	Domain: "localhost",
+		//  Path: "/",
+		//  HttpOnly: false,
+		//  Secure: true,
+		MaxAge:  0,
+		Expires: time.Now().AddDate(0, 0, 0),
+	}
+	http.SetCookie(w, cookie)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 func handleFunc() {
 	rtr := mux.NewRouter()
@@ -122,6 +162,7 @@ func handleFunc() {
 	rtr.HandleFunc("/create", create).Methods("GET")
 	rtr.HandleFunc("/save_user", save_user).Methods("POST")
 	rtr.HandleFunc("/valid", valid).Methods("POST")
+	rtr.HandleFunc("/logout", logout).Methods("GET")
 	http.Handle("/", rtr)
 
 	http.Handle("/style/", http.StripPrefix("/style/", http.FileServer(http.Dir("./style/"))))
@@ -130,5 +171,4 @@ func handleFunc() {
 func main() {
 	handleFunc()
 	//	inMemorySession = session.NewSession()
-
 }
