@@ -4,9 +4,10 @@ import (
 	"database/sql"
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 	"time"
-	"www/iternal/session"
+	"www/iternal/rands"
 
 	"github.com/gorilla/mux"
 	//"github.com/gorilla/sessions"
@@ -22,8 +23,8 @@ func checkError(err error) {
 }
 
 type User struct {
-	Id                   int
-	Name, Password, HASH string
+	Id                       int
+	Username, Password, HASH string
 }
 
 //var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
@@ -33,9 +34,8 @@ const (
 	COOKIE_NAME = "sessionId"
 )
 
-var inMemorySession *session.Session
-
 func index(w http.ResponseWriter, r *http.Request) {
+
 	t, _ := template.ParseFiles("assets/templates/index.html", "assets/templates/header.html", "assets/templates/footer.html")
 
 	db, err := sql.Open("sqlite3", "init/bd.sq3")
@@ -43,6 +43,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	t.ExecuteTemplate(w, "index", nil)
+
 }
 
 func create(w http.ResponseWriter, r *http.Request) {
@@ -62,12 +63,26 @@ func save_user(w http.ResponseWriter, r *http.Request) {
 		checkError(err)
 		defer db.Close()
 
-		sql2 := "INSERT INTO `user` (`username`, `password`) VALUES('" + username + "', '" + password + "')"
+		HASH := rands.GenerateId()
+
+		sql2 := "INSERT INTO `user` (`username`, `password`, `HASH`) VALUES('" + username + "', '" + password + "', '" + HASH + "')"
 		sql1, _ := db.Prepare(sql2)
 		tx, _ := db.Begin()
 		_, _ = tx.Stmt(sql1).Exec()
 		tx.Commit()
 		defer sql1.Close()
+
+		cookie := &http.Cookie{
+			Name: COOKIE_NAME,
+			//	Domain: "localhost",
+			//  Path: "/",
+			//  HttpOnly: false,
+			//  Secure: true,
+			//  MaxAge: 86400,
+			Expires: time.Now().AddDate(1, 0, 0),
+		}
+		cookie.Value = HASH
+		http.SetCookie(w, cookie)
 
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
@@ -87,23 +102,17 @@ func valid(w http.ResponseWriter, r *http.Request) {
 		db, _ := sql.Open("sqlite3", "init/bd.sq3")
 		defer db.Close()
 
-		sql3 := "SELECT * FROM `user` WHERE  username = " + username + " and password = " + password + ""
+		sql3 := "SELECT * FROM `user` WHERE  username = `" + username + "` and password = `" + password + "`"
+		log.Println(sql3)
 		res, _ := db.Query(sql3)
-		if res == nil {
-			fmt.Fprintf(w, "Неверные данные")
-		} else {
-
-			sessionId := inMemorySession.Init(username)
-			cookie := &http.Cookie{
-				Name:    COOKIE_NAME,
-				Value:   sessionId,
-				Expires: time.Now().Add(5 * time.Minute),
-			}
-			http.SetCookie(w, cookie)
-
-			//		http.Redirect(w, r, "/", http.StatusSeeOther)
-		}
 		defer res.Close()
+		var user User
+		for res.Next() {
+			res.Scan(&user.HASH)
+
+		}
+
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
 }
 func handleFunc() {
@@ -120,5 +129,6 @@ func handleFunc() {
 }
 func main() {
 	handleFunc()
-	inMemorySession = session.NewSession()
+	//	inMemorySession = session.NewSession()
+
 }
