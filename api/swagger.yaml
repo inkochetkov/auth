@@ -1,0 +1,220 @@
+openapi: 3.0.1
+info:
+  version: 1.0.0
+  title: API
+  description:  API specification
+  
+tags:
+  - name : auth
+  - name : user
+  - name : check
+  
+paths:
+  /users/:
+    get:
+      operationId: List
+      tags:
+        - user
+      summary: User
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/ErrorResponse"
+        "405":
+          $ref: "#/components/responses/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/ErrorResponse" 
+          
+    post:
+      operationId: Create
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      tags:
+        - Users
+      summary: Create
+      responses:
+        "201":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+        "405":
+          $ref: "#/components/responses/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/ErrorResponse"    
+          
+  /users/{id}/:
+    get:
+      parameters:
+        - $ref: "#/components/parameters/id"
+      operationId: Get
+      tags:
+        - user
+      summary: User
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/ErrorResponse"
+        "405":
+          $ref: "#/components/responses/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/ErrorResponse"   
+          
+    patch:
+      parameters:
+        - $ref: "#/components/parameters/id"
+      operationId: Update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      tags:
+        - user
+      summary: Update user
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+        "404":
+          $ref: "#/components/responses/ErrorResponse"
+        "405":
+          $ref: "#/components/responses/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/ErrorResponse"    
+          
+    delete:
+      parameters:
+        - $ref: "#/components/parameters/id"
+      operationId: Delete
+      tags:
+        - user
+      summary: Delete user
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+        "404":
+          $ref: "#/components/responses/ErrorResponse"
+        "405":
+          $ref: "#/components/responses/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/ErrorResponse"
+      
+          
+  /check/:
+    get:
+      operationId: Check
+      tags:
+        - check
+      summary: check server
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+
+  /login/:
+    post:
+      operationId: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginData"
+      tags:
+        - auth
+      summary: Login and get tokens
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/ErrorResponse"
+        "405":
+          $ref: "#/components/responses/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/ErrorResponse"        
+
+  /logout/:
+    post:
+      operationId: Logout
+      tags:
+        - auth
+      summary: Spoil tokens
+      responses:
+        "200":
+          description: "empty response"
+        "401":
+          $ref: "#/components/responses/ErrorResponse"
+        "405":
+          $ref: "#/components/responses/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/ErrorResponse"                
+          
+components:
+  responses:
+            
+    ErrorResponse:       
+      description: Response with error string
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "some error string"
+                
+    SuccessResponse:
+      description: Response with info string
+      content:
+        application/json:
+          schema:
+            type: object
+            
+  schemas:
+
+    LoginData:
+      type: object
+      properties:
+          login:
+            type: string
+            example: "any"
+          password:
+            type: string
+            example: "any"
+          
+            
+    User:
+      type: object
+      properties:
+          login:
+            type: string
+            example: "any"
+          password:
+            type: string
+            example: "any"
+          token:
+            type: string
+            example: "any"
+          option:  
+            type: object 
+            
+  parameters:
+    id:
+      name: id
+      in: path
+      description: "entity identifier"
+      required: true
+      schema:
+        type: string
+        example: "177"
