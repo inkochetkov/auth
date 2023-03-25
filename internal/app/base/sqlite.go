@@ -31,6 +31,7 @@ func (a *API) GetEntity(conditional map[string]any) (*entity.User, error) {
 	}
 
 	user := &entity.User{
+		ID:       userDB.ID,
 		Login:    userDB.Login,
 		Password: userDB.Password,
 		Option:   option,
@@ -64,6 +65,7 @@ func (a *API) ListEntity() ([]*entity.User, error) {
 		}
 
 		user := &entity.User{
+			ID:     userDB.ID,
 			Login:  userDB.Login,
 			Option: option,
 		}
@@ -77,8 +79,8 @@ func (a *API) ListEntity() ([]*entity.User, error) {
 	return users, nil
 }
 
-// EntityChange - entity operations
-func (a *API) EntityChange(items, condition map[string]any, operation string) error {
+// ChangeEntity - entity operations
+func (a *API) ChangeEntity(items, condition map[string]any, operation string) error {
 
 	ctx, cancel := context.WithTimeout(context.Background(), a.config.SQL.Timeout)
 	defer cancel()

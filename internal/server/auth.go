@@ -52,7 +52,7 @@ func (r *Router) Login(c *gin.Context) {
 	}
 
 	items := map[string]any{"token": t}
-	err = r.api.EntityChange(items, conditional, entity.Update)
+	err = r.api.ChangeEntity(items, conditional, entity.Update)
 	if err != nil {
 		renderError(c, http.StatusUnauthorized, err)
 		return
@@ -60,6 +60,7 @@ func (r *Router) Login(c *gin.Context) {
 
 	renderResponse(c, http.StatusOK, map[string]string{"Token": t})
 }
+
 func (r *Router) Logout(c *gin.Context) {
 
 	token, ok := c.Get(entity.Token)
@@ -72,7 +73,7 @@ func (r *Router) Logout(c *gin.Context) {
 		entity.Token: token,
 	}
 
-	err := r.api.EntityChange(nil, conditional, entity.Update)
+	err := r.api.ChangeEntity(nil, conditional, entity.Update)
 	if err != nil {
 		renderError(c, http.StatusUnauthorized, err)
 		return

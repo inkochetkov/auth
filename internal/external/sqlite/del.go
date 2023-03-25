@@ -7,6 +7,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// Delete entity
 func (b *SQLite) Delete(ctx context.Context, condition map[string]any) error {
 
 	var conditions string

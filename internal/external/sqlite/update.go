@@ -7,6 +7,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// Update entity
 func (b *SQLite) Update(ctx context.Context, items, condition map[string]any) error {
 
 	builder := sq.Update("user")

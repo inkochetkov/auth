@@ -3,6 +3,7 @@ package entity
 const (
 	Empty = ""
 	Token = "token"
+	Zero  = 0
 )
 
 const (
@@ -11,8 +12,4 @@ const (
 	Delete  = "delete"
 	Get     = "get"
 	GetList = "getlist"
-)
-
-const (
-	RBAC = "rbac"
 )

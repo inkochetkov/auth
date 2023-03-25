@@ -217,4 +217,4 @@ components:
       required: true
       schema:
         type: string
-        example: "177"
+        example: "1"

@@ -3,10 +3,10 @@ package app
 import "github.com/inkochetkov/auth/internal/entity"
 
 type API interface {
-	// get entity
+	// get user
 	GetEntity(conditional map[string]any) (*entity.User, error)
-	// get list entity
+	// get list user
 	ListEntity() ([]*entity.User, error)
-	// entity operations
-	EntityChange(items, condition map[string]any, operation string) error
+	// user operations
+	ChangeEntity(items, condition map[string]any, operation string) error
 }

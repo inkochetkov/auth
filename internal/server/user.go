@@ -40,13 +40,13 @@ func (r *Router) Create(c *gin.Context) {
 		items["option"] = *user.Option
 	}
 
-	err = r.Access(c, entity.Create)
+	err = r.Access(c, entity.Create, entity.Zero)
 	if err != nil {
 		renderError(c, http.StatusMethodNotAllowed, err)
 		return
 	}
 
-	err = r.api.EntityChange(items, nil, entity.Create)
+	err = r.api.ChangeEntity(items, nil, entity.Create)
 	if err != nil {
 		renderError(c, http.StatusMethodNotAllowed, err)
 		return
@@ -92,13 +92,13 @@ func (r *Router) Update(c *gin.Context, ids string) {
 		"id = ?": id,
 	}
 
-	err = r.Access(c, entity.Update)
+	err = r.Access(c, entity.Update, id)
 	if err != nil {
 		renderError(c, http.StatusMethodNotAllowed, err)
 		return
 	}
 
-	err = r.api.EntityChange(items, condition, entity.Update)
+	err = r.api.ChangeEntity(items, condition, entity.Update)
 	if err != nil {
 		renderError(c, http.StatusMethodNotAllowed, err)
 		return
@@ -114,7 +114,7 @@ func (r *Router) Delete(c *gin.Context, ids string) {
 		return
 	}
 
-	err = r.Access(c, entity.Delete)
+	err = r.Access(c, entity.Delete, id)
 	if err != nil {
 		renderError(c, http.StatusMethodNotAllowed, err)
 		return
@@ -124,7 +124,7 @@ func (r *Router) Delete(c *gin.Context, ids string) {
 		"id = ?": id,
 	}
 
-	err = r.api.EntityChange(nil, condition, entity.Delete)
+	err = r.api.ChangeEntity(nil, condition, entity.Delete)
 	if err != nil {
 		renderError(c, http.StatusMethodNotAllowed, err)
 		return
@@ -140,7 +140,7 @@ func (r *Router) Get(c *gin.Context, ids string) {
 		return
 	}
 
-	err = r.Access(c, entity.Get)
+	err = r.Access(c, entity.Get, id)
 	if err != nil {
 		renderError(c, http.StatusMethodNotAllowed, err)
 		return
@@ -163,7 +163,7 @@ func (r *Router) Get(c *gin.Context, ids string) {
 
 // List entity users
 func (r *Router) List(c *gin.Context) {
-	err := r.Access(c, entity.GetList)
+	err := r.Access(c, entity.GetList, entity.Zero)
 	if err != nil {
 		renderError(c, http.StatusMethodNotAllowed, err)
 		return

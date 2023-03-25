@@ -9,6 +9,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// Get entity
 func (b *SQLite) Get(ctx context.Context, conditional string, values []any) (*entity.UserDB, error) {
 
 	q, arg, err := sq.
@@ -32,6 +33,7 @@ func (b *SQLite) Get(ctx context.Context, conditional string, values []any) (*en
 	return user, nil
 }
 
+// GetList entity
 func (b *SQLite) GetList(ctx context.Context) ([]*entity.UserDB, error) {
 
 	q, arg, err := sq.

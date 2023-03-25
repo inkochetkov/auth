@@ -7,6 +7,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// Create entity
 func (b *SQLite) Create(ctx context.Context, items map[string]any) error {
 
 	var (
