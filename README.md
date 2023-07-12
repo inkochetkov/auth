@@ -5,7 +5,7 @@ authorization service for JWT
 ## use module
 
 - gin
-- [swagger](https://github.com/inkochetkov/auth/api/swagger.yaml)
+- [swagger](https://github.com/inkochetkov/auth/blob/main/api/swagger.yaml)
 - sqlite (need cgo)
 
 ## Examle 
