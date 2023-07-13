@@ -1,32 +1,17 @@
 package sqlite
 
 import (
-	"context"
-	"database/sql"
-
-	sq "github.com/Masterminds/squirrel"
 	"github.com/inkochetkov/auth/internal/entity"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 // Get entity
-func (b *SQLite) Get(ctx context.Context, conditional string, values []any) (*entity.UserDB, error) {
+func (b *SQLite) Get(conditional string, values []any) (*entity.User, error) {
 
-	q, arg, err := sq.
-		Select("login, password, token, option").
-		From("user").
-		Where(conditional, values...).
-		PlaceholderFormat(sq.Dollar).
-		ToSql()
+	var user *entity.User
+	err := b.db.Where(conditional, values...).Find(&user).Error
 	if err != nil {
-		return nil, err
-	}
-	user := &entity.UserDB{}
-	err = b.conn.QueryRowxContext(ctx, q, arg...).StructScan(user)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, nil
-		}
+		b.logger.Error("Get", err)
 		return nil, err
 	}
 
@@ -34,40 +19,12 @@ func (b *SQLite) Get(ctx context.Context, conditional string, values []any) (*en
 }
 
 // GetList entity
-func (b *SQLite) GetList(ctx context.Context) ([]*entity.UserDB, error) {
+func (b *SQLite) GetList() ([]*entity.User, error) {
 
-	q, arg, err := sq.
-		Select("login, password, token, option").
-		From("user").
-		OrderBy("id").
-		PlaceholderFormat(sq.Dollar).
-		ToSql()
+	var users []*entity.User
+	err := b.db.Find(users).Error
 	if err != nil {
-		return nil, err
-	}
-
-	rows, err := b.conn.QueryxContext(ctx, q, arg...)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, nil
-		}
-		return nil, err
-	}
-
-	var users []*entity.UserDB
-
-	for rows.Next() {
-		user := &entity.UserDB{}
-		err := rows.StructScan(user)
-		if err != nil {
-			return nil, err
-		}
-		users = append(users, user)
-
-	}
-
-	err = rows.Err()
-	if err != nil {
+		b.logger.Error("GetList", err)
 		return nil, err
 	}
 

@@ -8,7 +8,15 @@ type Config struct {
 		Password string `yaml:"password" `
 	} `yaml:"first_user"`
 
-	HTTP Server `yaml:"server_http"`
+	HTTP struct {
+		Mode    string `yaml:"mode"`
+		Host    string `yaml:"host"`
+		Port    string `yaml:"port"`
+		Timeout struct {
+			Write time.Duration `yaml:"write" default:"1m"`
+			Read  time.Duration `yaml:"read" default:"1m"`
+		} `yaml:"timeout"`
+	} `yaml:"server_http"`
 
 	JWT struct {
 		TTL         time.Duration `yaml:"ttl"`
@@ -16,22 +24,7 @@ type Config struct {
 	}
 
 	SQL struct {
-		PathSQL      string        `yaml:"path_sql"`
-		PathSQLName  string        `yaml:"path_sql_name"`
-		Timeout      time.Duration `yaml:"timeout"`
-		MaxOpenConns int           `yaml:"max_open_conns"`
-		MaxIdleConns int           `yaml:"max_idle_conns"`
-	}
-}
-
-type Server struct {
-	Mode    string  `yaml:"mode"`
-	Host    string  `yaml:"host"`
-	Port    string  `yaml:"port"`
-	Timeout Timeout `yaml:"timeout"`
-}
-
-type Timeout struct {
-	Write time.Duration `yaml:"write" default:"1m"`
-	Read  time.Duration `yaml:"read" default:"1m"`
+		Dir  string `yaml:"dir"`
+		Name string `yaml:"name"`
+	} `yaml:"sql`
 }

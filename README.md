@@ -33,9 +33,4 @@ jwt:
 
 ```
 
-## License
-
-MIT
-
-
 

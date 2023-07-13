@@ -1,9 +1,10 @@
 package entity
 
 const (
-	Empty = ""
-	Token = "token"
-	Zero  = 0
+	Empty            = ""
+	Token            = "token"
+	Zero             = 0
+	SqliteNameModule = "sqlite:"
 )
 
 const (

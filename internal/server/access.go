@@ -7,7 +7,7 @@ import (
 	"github.com/inkochetkov/auth/internal/entity"
 )
 
-func (r *Router) Access(c *gin.Context, operationID string, id int) error {
+func (r *Router) Access(c *gin.Context, operationID string, id int64) error {
 
 	token, ok := c.Get(entity.Token)
 	if !ok {
@@ -29,7 +29,12 @@ func (r *Router) Access(c *gin.Context, operationID string, id int) error {
 		return nil
 	}
 
-	role, ok := user.Option["role"]
+	option, err := entity.GetOption(user.Option)
+	if err != nil {
+		return err
+	}
+
+	role, ok := option["role"]
 	if !ok {
 		return errors.New("role is empty")
 	}

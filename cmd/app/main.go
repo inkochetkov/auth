@@ -1,27 +1,30 @@
 package main
 
 import (
-	"log"
 	"net/http"
+
+	"github.com/inkochetkov/log"
 
 	"github.com/inkochetkov/auth/internal/app/base"
 	"github.com/inkochetkov/auth/internal/entity"
 	"github.com/inkochetkov/auth/internal/external/sqlite"
 	serv "github.com/inkochetkov/auth/internal/server"
-	"github.com/inkochetkov/config/pkg/config"
+	"github.com/inkochetkov/config"
 )
 
 func main() {
 
+	logger := log.New(log.DevLog, "", "")
+
 	c, err := config.NewConfig("config/config.yaml", &entity.Config{})
 	if err != nil {
-		log.Fatal("fail config", err)
+		logger.Fatal("fail config", err)
 	}
 	conf := c.(*entity.Config)
 
-	app, clean, err := start(*conf)
+	app, clean, err := start(*conf, logger)
 	if err != nil {
-		log.Fatal("fail start serv", err)
+		logger.Fatal("fail start serv", err)
 	}
 	defer clean()
 
@@ -33,7 +36,7 @@ func main() {
 	}
 
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		log.Fatal("fail http server", err)
+		logger.Fatal("fail http server", err)
 	}
 
 }
@@ -46,10 +49,11 @@ func new(http http.Handler) application {
 	return application{http: http}
 }
 
-func start(config entity.Config) (application, func(), error) {
-	sqlite := sqlite.New(config)
+func start(config entity.Config, logger *log.Log) (application, func(), error) {
+
+	sqlite := sqlite.New(config, logger)
 	api := base.NewAPI(config, sqlite)
-	router := serv.NewRouter(api, config)
+	router := serv.NewRouter(api, config, logger)
 	handler := serv.NewHTTP(config, router)
 
 	mainApplication := new(handler)

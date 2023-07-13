@@ -1,7 +1,6 @@
 package server
 
 import (
-	"errors"
 	"net/http"
 	"time"
 
@@ -50,9 +49,8 @@ func (r *Router) Login(c *gin.Context) {
 		renderError(c, http.StatusUnauthorized, err)
 		return
 	}
-
-	items := map[string]any{"token": t}
-	err = r.api.ChangeEntity(items, conditional, entity.Update)
+	user.Token = &t
+	err = r.api.ChangeEntity(user, entity.Update)
 	if err != nil {
 		renderError(c, http.StatusUnauthorized, err)
 		return
@@ -63,17 +61,7 @@ func (r *Router) Login(c *gin.Context) {
 
 func (r *Router) Logout(c *gin.Context) {
 
-	token, ok := c.Get(entity.Token)
-	if !ok {
-		renderError(c, http.StatusUnauthorized, errors.New("token user fail"))
-		return
-	}
-
-	conditional := map[string]any{
-		entity.Token: token,
-	}
-
-	err := r.api.ChangeEntity(nil, conditional, entity.Update)
+	err := r.api.ChangeEntity(&entity.User{Token: nil}, entity.Update)
 	if err != nil {
 		renderError(c, http.StatusUnauthorized, err)
 		return

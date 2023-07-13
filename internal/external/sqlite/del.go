@@ -1,34 +1,15 @@
 package sqlite
 
 import (
-	"context"
-
-	sq "github.com/Masterminds/squirrel"
-	_ "github.com/mattn/go-sqlite3"
+	"github.com/inkochetkov/auth/internal/entity"
 )
 
 // Delete entity
-func (b *SQLite) Delete(ctx context.Context, condition map[string]any) error {
+func (b *SQLite) Delete(user *entity.User) error {
 
-	var conditions string
-	var values []any
-
-	for name, value := range condition {
-		conditions += ", " + name
-		values = append(values, value)
-	}
-
-	q, arg, err := sq.
-		Delete("user").
-		Where(conditions, values...).
-		PlaceholderFormat(sq.Dollar).
-		ToSql()
+	err := b.db.Where("id = ?", user.ID).Delete(&entity.User{}).Error
 	if err != nil {
-		return err
-	}
-
-	_, err = b.conn.ExecContext(ctx, q, arg...)
-	if err != nil {
+		b.logger.Error("Delete", err)
 		return err
 	}
 	return nil

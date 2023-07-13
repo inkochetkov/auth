@@ -1,37 +1,15 @@
 package sqlite
 
 import (
-	"context"
-
-	sq "github.com/Masterminds/squirrel"
-	_ "github.com/mattn/go-sqlite3"
+	"github.com/inkochetkov/auth/internal/entity"
 )
 
 // Create entity
-func (b *SQLite) Create(ctx context.Context, items map[string]any) error {
+func (b *SQLite) Create(user *entity.User) error {
 
-	var (
-		names  []string
-		values []any
-	)
-
-	for name, value := range items {
-		names = append(names, name)
-		values = append(values, value)
-	}
-
-	q, arg, err := sq.
-		Insert("user").
-		Columns(names...).
-		Values(values...).
-		PlaceholderFormat(sq.Dollar).
-		ToSql()
+	err := b.db.Create(user).Error
 	if err != nil {
-		return err
-	}
-
-	_, err = b.conn.ExecContext(ctx, q, arg...)
-	if err != nil {
+		b.logger.Error("Create", err)
 		return err
 	}
 

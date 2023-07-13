@@ -7,7 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/inkochetkov/auth/internal/entity"
-	"github.com/inkochetkov/gen-str/pkg/gen"
+	"github.com/inkochetkov/gen-str"
 )
 
 // Create entity user
@@ -31,13 +31,17 @@ func (r *Router) Create(c *gin.Context) {
 		return
 	}
 
-	items := map[string]any{
-		"login":    user.Login,
-		"password": password,
+	userDB := &entity.User{
+		Login:    *user.Login,
+		Password: password,
 	}
 
 	if user.Option != nil {
-		items["option"] = *user.Option
+		userDB.Option, err = entity.SetOption(*user.Option)
+		if err != nil {
+			renderError(c, http.StatusMethodNotAllowed, err)
+			return
+		}
 	}
 
 	err = r.Access(c, entity.Create, entity.Zero)
@@ -46,7 +50,7 @@ func (r *Router) Create(c *gin.Context) {
 		return
 	}
 
-	err = r.api.ChangeEntity(items, nil, entity.Create)
+	err = r.api.ChangeEntity(userDB, entity.Create)
 	if err != nil {
 		renderError(c, http.StatusMethodNotAllowed, err)
 		return
@@ -63,16 +67,16 @@ func (r *Router) Update(c *gin.Context, ids string) {
 		return
 	}
 
-	id, err := strconv.Atoi(ids)
+	id, err := strconv.ParseInt(ids, 10, 64)
 	if err != nil {
 		renderError(c, http.StatusMethodNotAllowed, err)
 		return
 	}
 
-	items := make(map[string]any)
+	userDB := &entity.User{ID: id}
 
 	if user.Login != nil {
-		items["login"] = *user.Login
+		userDB.Login = *user.Login
 	}
 
 	if user.Password != nil {
@@ -81,15 +85,15 @@ func (r *Router) Update(c *gin.Context, ids string) {
 			renderError(c, http.StatusMethodNotAllowed, err)
 			return
 		}
-		items["password"] = password
+		userDB.Password = password
 	}
 
 	if user.Option != nil {
-		items["option"] = *user.Option
-	}
-
-	condition := map[string]any{
-		"id = ?": id,
+		userDB.Option, err = entity.SetOption(*user.Option)
+		if err != nil {
+			renderError(c, http.StatusMethodNotAllowed, err)
+			return
+		}
 	}
 
 	err = r.Access(c, entity.Update, id)
@@ -98,7 +102,7 @@ func (r *Router) Update(c *gin.Context, ids string) {
 		return
 	}
 
-	err = r.api.ChangeEntity(items, condition, entity.Update)
+	err = r.api.ChangeEntity(userDB, entity.Update)
 	if err != nil {
 		renderError(c, http.StatusMethodNotAllowed, err)
 		return
@@ -108,7 +112,7 @@ func (r *Router) Update(c *gin.Context, ids string) {
 // Delete entity user
 func (r *Router) Delete(c *gin.Context, ids string) {
 
-	id, err := strconv.Atoi(ids)
+	id, err := strconv.ParseInt(ids, 10, 64)
 	if err != nil {
 		renderError(c, http.StatusMethodNotAllowed, err)
 		return
@@ -120,11 +124,7 @@ func (r *Router) Delete(c *gin.Context, ids string) {
 		return
 	}
 
-	condition := map[string]any{
-		"id = ?": id,
-	}
-
-	err = r.api.ChangeEntity(nil, condition, entity.Delete)
+	err = r.api.ChangeEntity(&entity.User{ID: id}, entity.Delete)
 	if err != nil {
 		renderError(c, http.StatusMethodNotAllowed, err)
 		return
@@ -134,7 +134,7 @@ func (r *Router) Delete(c *gin.Context, ids string) {
 // Get entity user
 func (r *Router) Get(c *gin.Context, ids string) {
 
-	id, err := strconv.Atoi(ids)
+	id, err := strconv.ParseInt(ids, 10, 64)
 	if err != nil {
 		renderError(c, http.StatusMethodNotAllowed, err)
 		return
@@ -163,6 +163,7 @@ func (r *Router) Get(c *gin.Context, ids string) {
 
 // List entity users
 func (r *Router) List(c *gin.Context) {
+
 	err := r.Access(c, entity.GetList, entity.Zero)
 	if err != nil {
 		renderError(c, http.StatusMethodNotAllowed, err)

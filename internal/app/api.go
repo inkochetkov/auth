@@ -8,5 +8,5 @@ type API interface {
 	// get list user
 	ListEntity() ([]*entity.User, error)
 	// user operations
-	ChangeEntity(items, condition map[string]any, operation string) error
+	ChangeEntity(user *entity.User, operation string) error
 }

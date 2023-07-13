@@ -1,40 +1,17 @@
 package sqlite
 
 import (
-	"context"
+	"errors"
 
-	sq "github.com/Masterminds/squirrel"
-	_ "github.com/mattn/go-sqlite3"
+	"github.com/inkochetkov/auth/internal/entity"
 )
 
 // Update entity
-func (b *SQLite) Update(ctx context.Context, items, condition map[string]any) error {
+func (b *SQLite) Update(user *entity.User) error {
 
-	builder := sq.Update("user")
-
-	var arg []any
-
-	for name, value := range items {
-		arg = append(arg, value)
-		builder = builder.Set(name, nil)
-	}
-
-	for name, value := range condition {
-		arg = append(arg, value)
-		builder = builder.Where(name)
-	}
-
-	q, _, err := builder.
-		PlaceholderFormat(sq.Dollar).
-		ToSql()
-
-	if err != nil {
-		return err
-	}
-
-	_, err = b.conn.ExecContext(ctx, q, arg...)
-	if err != nil {
-		return err
+	result := b.db.Model(&entity.User{}).Where("id =?", user.ID).Updates(user)
+	if result.RowsAffected == 0 {
+		return errors.New("user data not update")
 	}
 
 	return nil

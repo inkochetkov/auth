@@ -6,13 +6,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/inkochetkov/auth/internal/app"
 	"github.com/inkochetkov/auth/internal/entity"
+	"github.com/inkochetkov/log"
 )
 
 // NewRouter ...
-func NewRouter(api app.API, cfg entity.Config) *Router {
+func NewRouter(api app.API, cfg entity.Config, log *log.Log) *Router {
 	return &Router{
 		api: api,
 		cfg: cfg,
+		log: log,
 	}
 }
 
@@ -20,6 +22,7 @@ func NewRouter(api app.API, cfg entity.Config) *Router {
 type Router struct {
 	api app.API
 	cfg entity.Config
+	log *log.Log
 }
 
 func (r *Router) Check(c *gin.Context) {

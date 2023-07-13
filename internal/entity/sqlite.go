@@ -1,22 +1,52 @@
 package entity
 
 import (
-	"context"
-	"database/sql"
+	"encoding/json"
 )
 
-type UserDB struct {
-	ID       int            `db:"id"`
-	Login    string         `db:"login"`
-	Password string         `db:"password"`
-	Token    sql.NullString `db:"token"`
-	Option   []byte         `db:"option"`
+type User struct {
+	ID       int64   `db:"id" gorm:"primaryKey;AUTO_INCREMENT;not null;"`
+	Login    string  `db:"login"`
+	Password string  `db:"password"`
+	Token    *string `db:"token"`
+	Option   []byte  `db:"option"`
 }
 
 type ExteranlSQL interface {
-	Get(ctx context.Context, conditional string, values []any) (*UserDB, error)
-	GetList(ctx context.Context) ([]*UserDB, error)
-	Create(ctx context.Context, items map[string]any) error
-	Update(ctx context.Context, items, condition map[string]any) error
-	Delete(ctx context.Context, condition map[string]any) error
+	Get(conditional string, values []any) (*User, error)
+	GetList() ([]*User, error)
+	Create(*User) error
+	Update(*User) error
+	Delete(*User) error
+}
+
+func SetOption(option map[string]any) ([]byte, error) {
+
+	if option == nil {
+		return nil, nil
+	}
+
+	b, err := json.Marshal(option)
+	if err != nil {
+		return nil, err
+	}
+
+	return b, nil
+}
+
+func GetOption(b []byte) (map[string]any, error) {
+
+	if len(b) == 0 ||
+		string(b) == "{}" ||
+		string(b) == "null" {
+		return nil, nil
+	}
+
+	option := make(map[string]any)
+
+	err := json.Unmarshal(b, &option)
+	if err != nil {
+		return nil, err
+	}
+	return option, nil
 }
